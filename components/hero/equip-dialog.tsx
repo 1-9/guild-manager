@@ -51,9 +51,9 @@ export function EquipDialog({ heroId, availableItems }: EquipDialogProps) {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-6 w-6 p-0 rounded-full border border-dashed border-white/20 hover:border-white/50 text-white/20 hover:text-white">
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-full border border-dashed border-white/20 hover:border-white/50 text-white/20 hover:text-white my-auto">
                     <span className="sr-only">Equip</span>
-                    <span className="text-xs">+</span>
+                    <span className="text-lg font-light leading-none mb-0.5">+</span>
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px] bg-zinc-950 border-white/10 text-white">

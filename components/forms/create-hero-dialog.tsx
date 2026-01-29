@@ -39,7 +39,7 @@ export function CreateHeroDialog() {
                 return
             }
 
-            if (result.message.includes('Success')) {
+            if (result.message.includes('successfully')) {
                 toast.success(result.message)
                 setOpen(false)
             } else {

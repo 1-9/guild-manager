@@ -42,20 +42,40 @@
   }
 
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-zinc-950 text-foreground antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
-    background-image: radial-gradient(circle at 50% 0%, hsl(240 10% 10%) 0%, transparent 70%);
-    background-attachment: fixed;
   }
 }
 
 .glass-panel {
-  @apply bg-black/40 backdrop-blur-xl border border-white/10 shadow-2xl;
+  @apply bg-zinc-900/40 backdrop-blur-xl border border-white/15 shadow-2xl;
 }
 
 
 .glass-card-hover {
   @apply transition-all duration-300 hover:bg-white/5 hover:scale-[1.02] hover:shadow-xl hover:border-white/20;
+}
+
+@keyframes blob {
+  0% {
+    transform: translate(0px, 0px) scale(1);
+  }
+
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+
+  100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+}
+
+.animate-blob {
+  animation: blob 7s infinite;
 }
 
 /* Custom Scrollbar */
