@@ -1,0 +1,43 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Hero {
+  id    Int       @id @default(autoincrement())
+  name  String
+  class HeroClass
+  level Int
+  items Item[]
+}
+
+enum HeroClass {
+  WARRIOR
+  MAGE
+}
+
+model Item {
+  id      Int        @id @default(autoincrement())
+  name    String
+  type    ItemType
+  cost    Int
+  rarity  ItemRarity
+  hero    Hero?      @relation(fields: [heroId], references: [id])
+  heroId  Int?
+}
+
+enum ItemType {
+  WEAPON
+  ARMOR
+  POTION
+}
+
+enum ItemRarity {
+  COMMON
+  EPIC
+  LEGENDARY
+}

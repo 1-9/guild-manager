@@ -1,65 +1,128 @@
-import Image from "next/image";
+import { prisma } from "@/lib/prisma"
+import { GlassCard } from "@/components/ui/glass-card"
 
-export default function Home() {
+export const dynamic = 'force-dynamic'
+
+export default async function Home() {
+  const heroes = await prisma.hero.findMany({
+    include: { items: true },
+    orderBy: { level: 'desc' }
+  })
+
+  const warehouseItems = await prisma.item.findMany({
+    where: { heroId: null },
+    orderBy: { cost: 'desc' }
+  })
+
+  // Calculate some stats
+  const totalValue = [...heroes.flatMap(h => h.items), ...warehouseItems]
+    .reduce((sum, item) => sum + item.cost, 0);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <main className="min-h-screen p-8 md:p-12 space-y-12 max-w-7xl mx-auto">
+      <header className="flex justify-between items-end border-b border-white/5 pb-6">
+        <div>
+          <h1 className="text-5xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white via-white/90 to-white/50">
+            Guild Manager
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+          <p className="text-white/40 mt-2 font-light">Inventory & Hero Tracking System</p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <div className="text-right">
+          <span className="px-3 py-1 rounded-full bg-white/5 text-xs text-white/50 border border-white/10">v0.1.0 MVP</span>
         </div>
-      </main>
-    </div>
-  );
+      </header>
+
+      {/* Overview Stats */}
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <GlassCard>
+          <h3 className="text-sm font-medium text-white/50 uppercase tracking-widest">Active Heroes</h3>
+          <p className="text-5xl font-light mt-4 text-white">{heroes.length}</p>
+        </GlassCard>
+        <GlassCard>
+          <h3 className="text-sm font-medium text-white/50 uppercase tracking-widest">Warehouse Items</h3>
+          <p className="text-5xl font-light mt-4 text-white">{warehouseItems.length}</p>
+        </GlassCard>
+        <GlassCard>
+          <h3 className="text-sm font-medium text-white/50 uppercase tracking-widest">Guild Assets</h3>
+          <p className="text-5xl font-light mt-4 text-emerald-400/90">{totalValue.toLocaleString()} <span className="text-lg text-white/30">Gold</span></p>
+        </GlassCard>
+      </section>
+
+      {/* Heroes Roster */}
+      <section className="space-y-6">
+        <h2 className="text-2xl font-light text-white/80">Roster</h2>
+        <div className="grid gap-4">
+          {heroes.map(hero => (
+            <GlassCard key={hero.id} clickable className="flex flex-col md:flex-row md:items-center justify-between gap-4 group">
+              <div className="flex items-center gap-6">
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg
+                            ${hero.class === 'WARRIOR' ? 'bg-red-500/10 text-red-500 border border-red-500/20' : 'bg-blue-500/10 text-blue-500 border border-blue-500/20'}
+                        `}>
+                  {hero.class === 'WARRIOR' ? 'W' : 'M'}
+                </div>
+                <div>
+                  <div className="text-xl font-medium text-white group-hover:text-white transition-colors">{hero.name}</div>
+                  <div className="text-sm text-white/40 flex gap-2 items-center">
+                    <span>Level {hero.level}</span>
+                    <span className="w-1 h-1 rounded-full bg-white/20"></span>
+                    <span>{hero.class}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-2 md:justify-end">
+                {hero.items.length === 0 && <span className="text-xs text-white/20 italic p-2">Empty slots</span>}
+                {hero.items.map(item => (
+                  <div key={item.id} className={`px-3 py-1.5 rounded-lg text-xs border backdrop-blur-md flex items-center gap-2
+                                ${item.rarity === 'LEGENDARY' ? 'bg-amber-500/10 border-amber-500/20 text-amber-200' :
+                      item.rarity === 'EPIC' ? 'bg-purple-500/10 border-purple-500/20 text-purple-200' :
+                        'bg-slate-500/10 border-white/5 text-slate-300'}
+                            `}>
+                    {item.name}
+                  </div>
+                ))}
+              </div>
+            </GlassCard>
+          ))}
+        </div>
+      </section>
+
+      {/* Warehouse Grid */}
+      <section className="space-y-6">
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-light text-white/80">Warehouse</h2>
+          <div className="text-sm text-white/30">Showing all items</div>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          {warehouseItems.map(item => (
+            <GlassCard key={item.id} clickable className="relative overflow-hidden group min-h-[140px] flex flex-col justify-between p-5">
+              <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
+              <div>
+                <div className="font-medium text-white/90 truncate" title={item.name}>{item.name}</div>
+                <div className="text-xs text-white/40 mt-1 uppercase tracking-wider">{item.type}</div>
+              </div>
+
+              <div className="flex justify-between items-end mt-4">
+                <div className="text-sm text-white/60 font-mono">{item.cost}</div>
+                {item.rarity !== 'COMMON' && (
+                  <div className={`text-[10px] px-1.5 py-0.5 rounded border
+                                ${item.rarity === 'LEGENDARY' ? 'border-amber-500/30 text-amber-500' : 'border-purple-500/30 text-purple-500'}
+                             `}>
+                    {item.rarity[0]}
+                  </div>
+                )}
+              </div>
+            </GlassCard>
+          ))}
+          {/* Placeholders for visual balance if few items */}
+          {Array.from({ length: Math.max(0, 5 - warehouseItems.length) }).map((_, i) => (
+            <div key={i} className="border border-white/5 rounded-xl border-dashed bg-white/[0.02] flex items-center justify-center p-6 min-h-[140px]">
+              <span className="text-white/10 text-2xl">+</span>
+            </div>
+          ))}
+        </div>
+      </section>
+    </main>
+  )
 }
