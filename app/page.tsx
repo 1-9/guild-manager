@@ -1,5 +1,11 @@
 import { prisma } from "@/lib/prisma"
 import { GlassCard } from "@/components/ui/glass-card"
+import { CreateHeroDialog } from "@/components/forms/create-hero-dialog"
+import { CreateItemDialog } from "@/components/forms/create-item-dialog"
+import { HeroCardActions } from "@/components/hero/hero-card-actions"
+import { EquipDialog } from "@/components/hero/equip-dialog"
+import { unequipItem } from "./actions/item"
+import { X } from "lucide-react"
 
 export const dynamic = 'force-dynamic'
 
@@ -27,8 +33,9 @@ export default async function Home() {
           </h1>
           <p className="text-white/40 mt-2 font-light">Inventory & Hero Tracking System</p>
         </div>
-        <div className="text-right">
-          <span className="px-3 py-1 rounded-full bg-white/5 text-xs text-white/50 border border-white/10">v0.1.0 MVP</span>
+        <div className="flex gap-4 items-center">
+          <CreateHeroDialog />
+          <CreateItemDialog />
         </div>
       </header>
 
@@ -53,7 +60,7 @@ export default async function Home() {
         <h2 className="text-2xl font-light text-white/80">Roster</h2>
         <div className="grid gap-4">
           {heroes.map(hero => (
-            <GlassCard key={hero.id} clickable className="flex flex-col md:flex-row md:items-center justify-between gap-4 group">
+            <GlassCard key={hero.id} className="flex flex-col md:flex-row md:items-center justify-between gap-4 group">
               <div className="flex items-center gap-6">
                 <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg
                             ${hero.class === 'WARRIOR' ? 'bg-red-500/10 text-red-500 border border-red-500/20' : 'bg-blue-500/10 text-blue-500 border border-blue-500/20'}
@@ -66,21 +73,37 @@ export default async function Home() {
                     <span>Level {hero.level}</span>
                     <span className="w-1 h-1 rounded-full bg-white/20"></span>
                     <span>{hero.class}</span>
+                    <span className="w-1 h-1 rounded-full bg-white/20"></span>
+                    <span className="text-white/60">
+                      Eq. Value: <span className="font-mono text-emerald-400/80">{hero.items.reduce((sum, i) => sum + i.cost, 0)}</span>
+                    </span>
                   </div>
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-2 md:justify-end">
-                {hero.items.length === 0 && <span className="text-xs text-white/20 italic p-2">Empty slots</span>}
-                {hero.items.map(item => (
-                  <div key={item.id} className={`px-3 py-1.5 rounded-lg text-xs border backdrop-blur-md flex items-center gap-2
-                                ${item.rarity === 'LEGENDARY' ? 'bg-amber-500/10 border-amber-500/20 text-amber-200' :
-                      item.rarity === 'EPIC' ? 'bg-purple-500/10 border-purple-500/20 text-purple-200' :
-                        'bg-slate-500/10 border-white/5 text-slate-300'}
-                            `}>
-                    {item.name}
-                  </div>
-                ))}
+              <div className="flex flex-wrap gap-2 md:justify-end items-center">
+                <div className="flex flex-wrap gap-2 mr-4">
+                  {hero.items.length === 0 && <span className="text-xs text-white/20 italic p-2">No equipment</span>}
+                  {hero.items.map(item => (
+                    <form key={item.id} action={async () => {
+                      'use server'
+                      await unequipItem(item.id)
+                    }}>
+                      <button type="submit" className={`px-3 py-1.5 rounded-lg text-xs border backdrop-blur-md flex items-center gap-2 hover:bg-red-500/10 hover:border-red-500/30 transition-colors cursor-pointer group/item
+                                        ${item.rarity === 'LEGENDARY' ? 'bg-amber-500/10 border-amber-500/20 text-amber-200' :
+                          item.rarity === 'EPIC' ? 'bg-purple-500/10 border-purple-500/20 text-purple-200' :
+                            'bg-slate-500/10 border-white/5 text-slate-300'}
+                                    `}>
+                        {item.name}
+                        <X className="w-3 h-3 opacity-0 group-hover/item:opacity-100 transition-opacity" suppressHydrationWarning />
+                      </button>
+                    </form>
+                  ))}
+                  <EquipDialog heroId={hero.id} availableItems={warehouseItems} />
+                </div>
+                <div className="border-l border-white/10 pl-4">
+                  <HeroCardActions heroId={hero.id} />
+                </div>
               </div>
             </GlassCard>
           ))}
@@ -91,11 +114,11 @@ export default async function Home() {
       <section className="space-y-6">
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-light text-white/80">Warehouse</h2>
-          <div className="text-sm text-white/30">Showing all items</div>
+          <div className="text-sm text-white/30">Showing inventory</div>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
           {warehouseItems.map(item => (
-            <GlassCard key={item.id} clickable className="relative overflow-hidden group min-h-[140px] flex flex-col justify-between p-5">
+            <GlassCard key={item.id} className="relative overflow-hidden group min-h-[140px] flex flex-col justify-between p-5">
               <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
               <div>
