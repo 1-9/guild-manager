@@ -1,0 +1,29 @@
+services:
+  guild-manager:
+    container_name: guild-manager
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      - DATABASE_URL=file:/app/data/prod.db
+      - NODE_ENV=production
+      - NEXT_TELEMETRY_DISABLED=1
+    volumes:
+      - sqlite_data:/app/data
+    networks:
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.guild-manager.rule=Host(`guild-manager.mlbb.cloud`)"
+      - "traefik.http.routers.guild-manager.entrypoints=websecure"
+      - "traefik.http.routers.guild-manager.tls.certresolver=myresolver"
+      - "traefik.http.routers.guild-manager.tls=true"
+
+volumes:
+  sqlite_data:
+
+
+networks:
+  traefik:
+    external: true
