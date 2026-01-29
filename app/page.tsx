@@ -5,6 +5,7 @@ import { CreateItemDialog } from "@/components/forms/create-item-dialog"
 import { HeroCardActions } from "@/components/hero/hero-card-actions"
 import { EquipDialog } from "@/components/hero/equip-dialog"
 import { unequipItem } from "./actions/item"
+import { LegendaryStorageWidget } from "@/components/dashboard/LegendaryStorageWidget"
 import { X } from "lucide-react"
 
 export const dynamic = 'force-dynamic'
@@ -39,20 +40,25 @@ export default async function Home() {
         </div>
       </header>
 
-      {/* Overview Stats */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <GlassCard>
-          <h3 className="text-sm font-medium text-white/50 uppercase tracking-widest">Active Heroes</h3>
-          <p className="text-5xl font-light mt-4 text-white">{heroes.length}</p>
-        </GlassCard>
-        <GlassCard>
-          <h3 className="text-sm font-medium text-white/50 uppercase tracking-widest">Warehouse Items</h3>
-          <p className="text-5xl font-light mt-4 text-white">{warehouseItems.length}</p>
-        </GlassCard>
-        <GlassCard>
-          <h3 className="text-sm font-medium text-white/50 uppercase tracking-widest">Guild Assets</h3>
-          <p className="text-5xl font-light mt-4 text-emerald-400/90">{totalValue.toLocaleString()} <span className="text-lg text-white/30">Gold</span></p>
-        </GlassCard>
+      {/* Overview Stats & Widgets */}
+      <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-6 h-full">
+          <GlassCard className="flex flex-col justify-center">
+            <h3 className="text-sm font-medium text-white/50 uppercase tracking-widest">Active Heroes</h3>
+            <p className="text-5xl font-light mt-4 text-white">{heroes.length}</p>
+          </GlassCard>
+          <GlassCard className="flex flex-col justify-center">
+            <h3 className="text-sm font-medium text-white/50 uppercase tracking-widest">Warehouse Items</h3>
+            <p className="text-5xl font-light mt-4 text-white">{warehouseItems.length}</p>
+          </GlassCard>
+          <GlassCard className="flex flex-col justify-center">
+            <h3 className="text-sm font-medium text-white/50 uppercase tracking-widest">Guild Assets</h3>
+            <p className="text-5xl font-light mt-4 text-emerald-400/90">{totalValue.toLocaleString()} <span className="text-lg text-white/30">Gold</span></p>
+          </GlassCard>
+        </div>
+        <div className="lg:col-span-1">
+          <LegendaryStorageWidget />
+        </div>
       </section>
 
       {/* Heroes Roster */}

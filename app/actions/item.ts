@@ -74,3 +74,21 @@ export async function unequipItem(itemId: number) {
         return { message: 'Failed to unequip item.' }
     }
 }
+
+export async function getUnassignedLegendaryItems() {
+    try {
+        const items = await prisma.item.findMany({
+            where: {
+                rarity: ItemRarity.LEGENDARY,
+                heroId: null
+            },
+            orderBy: {
+                name: 'asc'
+            }
+        })
+        return items
+    } catch (error) {
+        console.error("Failed to fetch legendary items:", error)
+        return []
+    }
+}
